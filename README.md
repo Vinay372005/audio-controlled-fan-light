@@ -15,3 +15,7 @@ Tech Stack:
 - Scikit-learn
 - Streamlit
 - Matplotlib
+## Current Status
+- Project structure finalized
+- Audio data will be added at final stage
+- ML model training pending
