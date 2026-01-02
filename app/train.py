@@ -1,15 +1,20 @@
-# Training script (to be implemented)
 import os
+from features import extract_features
 
 CLAP_DIR = "data/clap"
 NOISE_DIR = "data/noise"
 
-def check_data():
-    clap_files = os.listdir(CLAP_DIR)
-    noise_files = os.listdir(NOISE_DIR)
+X = []
+y = []
 
-    print("Clap files:", len(clap_files))
-    print("Noise files:", len(noise_files))
+def load_data():
+    print("Preparing dataset...")
+    print("Clap folder:", CLAP_DIR)
+    print("Noise folder:", NOISE_DIR)
+
+def train_model():
+    print("Training module ready (model will be added later)")
 
 if __name__ == "__main__":
-    check_data()
+    load_data()
+    train_model()
