@@ -7,6 +7,7 @@ NOISE_DIR = "data/noise"
 X = []
 y = []
 
+
 def load_data():
     print("Preparing dataset...")
     print("Clap folder:", CLAP_DIR)
