@@ -9,3 +9,4 @@ def toggle():
 if __name__ == "__main__":
     print("Initial State:", state)
     print("After Clap:", toggle())
+
