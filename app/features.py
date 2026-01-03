@@ -1,48 +1,53 @@
 import os
-import numpy as np
 import librosa
+import numpy as np
+import pandas as pd
+
+DATA_DIR = "data"
+OUTPUT_CSV = "data/features.csv"
 
 def extract_features(file_path):
-    y, sr = librosa.load(file_path, sr=None)
+    y, sr = librosa.load(file_path, duration=2.0)
 
-    # Feature 1: Short-time energy
-    energy = np.sum(y**2) / len(y)
+    features = []
 
-    # Feature 2: Zero Crossing Rate
-    zcr = np.mean(librosa.feature.zero_crossing_rate(y))
+    # 1. Zero Crossing Rate
+    features.append(np.mean(librosa.feature.zero_crossing_rate(y)))
 
-    # Feature 3: MFCC (mean of 13 coefficients)
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
-    mfcc_mean = np.mean(mfcc)
+    # 2. RMS Energy
+    features.append(np.mean(librosa.feature.rms(y=y)))
 
-    return [energy, zcr, mfcc_mean]
+    # 3. Spectral Centroid
+    features.append(np.mean(librosa.feature.spectral_centroid(y=y, sr=sr)))
 
+    # 4. Spectral Bandwidth
+    features.append(np.mean(librosa.feature.spectral_bandwidth(y=y, sr=sr)))
 
-def load_dataset(data_path="data"):
-    X = []
-    y = []
+    # 5. Spectral Roll-off
+    features.append(np.mean(librosa.feature.spectral_rolloff(y=y, sr=sr)))
 
-    clap_path = os.path.join(data_path, "clap")
-    noise_path = os.path.join(data_path, "noise")
+    # 6–15 MFCCs
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=10)
+    features.extend(np.mean(mfcc, axis=1))
 
-    # Clap = 1
-    for file in os.listdir(clap_path):
+    return features
+
+features = []
+labels = []
+
+for label, folder in enumerate(["noise", "clap"]):
+    folder_path = os.path.join(DATA_DIR, folder)
+
+    for file in os.listdir(folder_path):
         if file.endswith(".wav"):
-            features = extract_features(os.path.join(clap_path, file))
-            X.append(features)
-            y.append(1)
+            file_path = os.path.join(folder_path, file)
+            features.append(extract_features(file_path))
+            labels.append(label)
 
-    # Noise = 0
-    for file in os.listdir(noise_path):
-        if file.endswith(".wav"):
-            features = extract_features(os.path.join(noise_path, file))
-            X.append(features)
-            y.append(0)
+df = pd.DataFrame(features)
+df["label"] = labels
 
-    return np.array(X), np.array(y)
+df.to_csv(OUTPUT_CSV, index=False)
 
-
-if __name__ == "__main__":
-    X, y = load_dataset()
-    print("Features shape:", X.shape)
-    print("Labels shape:", y.shape)
+print("Features saved to", OUTPUT_CSV)
+print("Feature shape:", df.shape)
