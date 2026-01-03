@@ -4,8 +4,9 @@ import numpy as np
 import pandas as pd
 
 print("CURRENT WORKING DIR:", os.getcwd())
-DATA_DIR = "../data"
-OUTPUT_CSV = "../data/features.csv"
+DATA_DIR = "data"
+OUTPUT_CSV = "data/features.csv"
+
 
 
 def extract_features(file_path):
