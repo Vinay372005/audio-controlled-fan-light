@@ -3,9 +3,9 @@ import librosa
 import numpy as np
 import pandas as pd
 
-DATA_DIR = "../data"
+DATA_DIR = "data"
+OUTPUT_CSV = "data/features.csv"
 
-OUTPUT_CSV = "../data/features.csv"
 
 
 def extract_features(file_path):
