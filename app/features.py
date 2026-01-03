@@ -3,9 +3,10 @@ import librosa
 import numpy as np
 import pandas as pd
 
-# Correct paths for your current directory structure
-DATA_DIR = "data"  # 'data' folder is in the same folder as features.py
-OUTPUT_CSV = "data/features.csv"
+print("CURRENT WORKING DIR:", os.getcwd())
+DATA_DIR = "../data"
+OUTPUT_CSV = "../data/features.csv"
+
 
 def extract_features(file_path):
     y, sr = librosa.load(file_path, duration=2.0)
