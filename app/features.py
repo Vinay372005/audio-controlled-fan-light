@@ -3,14 +3,12 @@ import librosa
 import numpy as np
 import pandas as pd
 
-DATA_DIR = "data"
+# Correct paths for your current directory structure
+DATA_DIR = "data"  # 'data' folder is in the same folder as features.py
 OUTPUT_CSV = "data/features.csv"
-
-
 
 def extract_features(file_path):
     y, sr = librosa.load(file_path, duration=2.0)
-
     features = []
 
     # 1. Zero Crossing Rate
@@ -37,8 +35,12 @@ def extract_features(file_path):
 features = []
 labels = []
 
+# Loop over your folders: 'noise' and 'clap'
 for label, folder in enumerate(["noise", "clap"]):
     folder_path = os.path.join(DATA_DIR, folder)
+    # Check if folder exists
+    if not os.path.exists(folder_path):
+        raise FileNotFoundError(f"Folder not found: {folder_path}")
 
     for file in os.listdir(folder_path):
         if file.endswith(".wav"):
@@ -46,9 +48,9 @@ for label, folder in enumerate(["noise", "clap"]):
             features.append(extract_features(file_path))
             labels.append(label)
 
+# Save features and labels to CSV
 df = pd.DataFrame(features)
 df["label"] = labels
-
 df.to_csv(OUTPUT_CSV, index=False)
 
 print("Features saved to", OUTPUT_CSV)
