@@ -3,8 +3,10 @@ import librosa
 import numpy as np
 import pandas as pd
 
-DATA_DIR = "data"
-OUTPUT_CSV = "data/features.csv"
+DATA_DIR = "../data"
+
+OUTPUT_CSV = "../data/features.csv"
+
 
 def extract_features(file_path):
     y, sr = librosa.load(file_path, duration=2.0)
