@@ -1,4 +1,4 @@
-from fsm import ClapFSM
+from app.fsm import ClapFSM
 
 def main():
     print("Starting Clap Detection App...")
