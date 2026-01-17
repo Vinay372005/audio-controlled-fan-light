@@ -1,32 +1,39 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-import joblib
 import os
+import numpy as np
+import pandas as pd
+import joblib
+from sklearn.ensemble import RandomForestClassifier
+from app.features import extract_features
 
-df = pd.read_csv("data/features.csv")
+CLAP_DIR = "data/clap"
+NOISE_DIR = "data/noise"
+MODEL_PATH = "models/clap_detector.pkl"
 
-# REMOVE filename column
-X = df.drop(["label", "filename"], axis=1)
-y = df["label"]
+X = []
+y = []
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+print("Processing CLAP files...")
+for file in os.listdir(CLAP_DIR):
+    if file.endswith(".wav"):
+        path = os.path.join(CLAP_DIR, file)
+        X.append(extract_features(path))
+        y.append(1)
 
-model = RandomForestClassifier(
-    n_estimators=300,
-    random_state=42
-)
+print("Processing NOISE files...")
+for file in os.listdir(NOISE_DIR):
+    if file.endswith(".wav"):
+        path = os.path.join(NOISE_DIR, file)
+        X.append(extract_features(path))
+        y.append(0)
 
-model.fit(X_train, y_train)
+X = np.array(X)
+y = np.array(y)
 
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
 
 os.makedirs("models", exist_ok=True)
-joblib.dump(model, "models/clap_detector.pkl")
+joblib.dump(model, MODEL_PATH)
 
-print("Model accuracy:", accuracy)
-print("Model saved to models/clap_detector.pkl")
+print("✅ Model trained successfully")
+print("Model saved to:", MODEL_PATH)
