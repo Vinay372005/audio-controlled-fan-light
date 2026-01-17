@@ -5,53 +5,28 @@ from sklearn.metrics import accuracy_score
 import joblib
 import os
 
-# ==============================
-# Paths
-# ==============================
-BASE_DIR = os.getcwd()                  # /content/audio-controlled-fan-light
-DATA_CSV = os.path.join(BASE_DIR, "data", "features.csv")
-MODEL_PATH = os.path.join(BASE_DIR, "models", "clap_detector.pkl")
+df = pd.read_csv("data/features.csv")
 
-# ==============================
-# Load CSV
-# ==============================
-df = pd.read_csv(DATA_CSV)
-
-# Remove non-feature columns (like filename)
-feature_cols = [col for col in df.columns if col not in ["label", "filename"]]
-X = df[feature_cols]
+# REMOVE filename column
+X = df.drop(["label", "filename"], axis=1)
 y = df["label"]
 
-print(f"Features shape: {X.shape}, Labels shape: {y.shape}")
-
-# ==============================
-# Train-test split
-# ==============================
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+    X, y, test_size=0.2, random_state=42
 )
 
-# ==============================
-# Train model
-# ==============================
 model = RandomForestClassifier(
     n_estimators=300,
-    max_depth=None,
     random_state=42
 )
 
 model.fit(X_train, y_train)
 
-# ==============================
-# Evaluate
-# ==============================
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"✅ Model accuracy: {accuracy*100:.2f}%")
 
-# ==============================
-# Save model
-# ==============================
-os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-joblib.dump(model, MODEL_PATH)
-print(f"✅ Model saved at: {MODEL_PATH}")
+os.makedirs("models", exist_ok=True)
+joblib.dump(model, "models/clap_detector.pkl")
+
+print("Model accuracy:", accuracy)
+print("Model saved to models/clap_detector.pkl")
