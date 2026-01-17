@@ -1,24 +1,23 @@
-import os
-from app.predict import predict
-
-WAITING = 0
-CLAP_DETECTED = 1
-
 class ClapFSM:
     def __init__(self):
-        self.state = WAITING
+        self.state = "WAITING"
+        self.fan_status = "OFF"
+        self.light_status = "OFF"
+        self.clap_count = 0
 
-    def run(self):
-        for folder in ["data/clap", "data/noise"]:
-            for file in sorted(os.listdir(folder)):
-                if file.endswith(".wav"):
-                    self.handle_file(os.path.join(folder, file))
+    def process_clap(self):
+        """Process detected clap and toggle devices."""
+        if self.state == "WAITING":
+            self.state = "CLAP_DETECTED"
+            self.clap_count += 1
+            if self.clap_count % 2 == 1:
+                self.fan_status = "ON" if self.fan_status == "OFF" else "OFF"
+            else:
+                self.light_status = "ON" if self.light_status == "OFF" else "OFF"
+            
+            print(f"🔊 Clap #{self.clap_count}: Fan={self.fan_status}, Light={self.light_status}")
+        # Auto-reset after short delay in app.py
 
-    def handle_file(self, file_path):
-        prediction = predict(file_path)
-
-        if self.state == WAITING and prediction == 1:
-            print(f"CLAP detected → {file_path}")
-            self.state = CLAP_DETECTED
-        else:
-            self.state = WAITING
+    def reset(self):
+        """Reset to waiting after noise or timeout."""
+        self.state = "WAITING"
