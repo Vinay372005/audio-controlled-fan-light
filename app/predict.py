@@ -2,8 +2,17 @@ import joblib
 import numpy as np
 from features import extract_features
 
-model = joblib.load("models/clap_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
+import os
+
+
+# Get absolute path to models folder
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "models", "clap_model.pkl")
+scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
+
+model = joblib.load(model_path)
+scaler = joblib.load(scaler_path)
+
 
 def predict_audio(file_path):
     features = extract_features(file_path)
