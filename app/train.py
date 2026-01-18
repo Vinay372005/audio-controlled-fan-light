@@ -63,3 +63,21 @@ joblib.dump(model, "models/clap_model.pkl")
 joblib.dump(scaler, "models/scaler.pkl")
 
 print("✅ Model saved")
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
+# Confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(5, 4))
+sns.heatmap(cm, annot=True, fmt="d",
+            xticklabels=["Noise", "Clap"],
+            yticklabels=["Noise", "Clap"])
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+
+plt.savefig("plots/confusion_matrix.png")
+plt.show()
+
