@@ -1,37 +1,32 @@
-import os
 import librosa
-import pandas as pd
 import numpy as np
-from pathlib import Path
 
-def extract_features(file_path):
-    """Extract 15 Librosa features for clap detection."""
-    y, sr = librosa.load(file_path, sr=22050, duration=2.0)
-    zcr = librosa.feature.zero_crossing_rate(y)[0].mean()
-    rms = librosa.feature.rms(y=y)[0].mean()
-    centroid = librosa.feature.spectral_centroid(y=y, sr=sr)[0].mean()
-    bandwidth = librosa.feature.spectral_bandwidth(y=y, sr=sr)[0].mean()
-    rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0].mean()
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=10).mean(axis=1)
-    return np.concatenate([[zcr, rms, centroid, bandwidth, rolloff], mfcc])
+def extract_features(file_path, sr=22050):
+    y, sr = librosa.load(file_path, sr=sr)
 
-clap_dir = Path('../data/clap')
-noise_dir = Path('../data/noise')
+    # Remove silence
+    y, _ = librosa.effects.trim(y)
 
-clap_files = list(clap_dir.glob('*.wav'))
-noise_files = list(noise_dir.glob('*.wav'))
+    # ----- TIME DOMAIN -----
+    zcr = np.mean(librosa.feature.zero_crossing_rate(y))
+    rms = np.mean(librosa.feature.rms(y=y))
 
-print(f"Found {len(clap_files)} claps, {len(noise_files)} noises")
+    # ----- FREQUENCY DOMAIN -----
+    spec_centroid = np.mean(librosa.feature.spectral_centroid(y=y, sr=sr))
+    spec_bandwidth = np.mean(librosa.feature.spectral_bandwidth(y=y, sr=sr))
+    rolloff = np.mean(librosa.feature.spectral_rolloff(y=y, sr=sr))
 
-features, labels = [], []
-for f in clap_files:
-    features.append(extract_features(f))
-    labels.append(1)
-for f in noise_files:
-    features.append(extract_features(f))
-    labels.append(0)
+    # ----- MFCC -----
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    mfcc_mean = np.mean(mfcc, axis=1)
 
-df = pd.DataFrame(features, columns=[f'feat_{i}' for i in range(15)])
-df['label'] = labels
-df.to_csv('../data/features.csv', index=False)
-print("✓ Features saved to data/features.csv") [web:6]
+    features = np.hstack([
+        mfcc_mean,
+        zcr,
+        rms,
+        spec_centroid,
+        spec_bandwidth,
+        rolloff
+    ])
+
+    return features
